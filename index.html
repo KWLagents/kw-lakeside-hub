@@ -408,8 +408,9 @@ async function loadListings() {
     document.getElementById('stat-listings').textContent = data.length;
     let total = 0;
     [...data].reverse().forEach(r => {
-      const price = parseFloat((r.price||'').replace(/[^0-9.]/g,'')) || 0;
+      const price = parseFloat((r.price||'').toString().replace(/[^0-9.]/g,'')) || 0;
       total += price;
+      const fmtPrice = price ? '$' + price.toLocaleString('en-US') : (r.price||'');
       const init = r.agentName ? r.agentName.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '??';
       let dateStr = '';
       if (r.listDate) {
@@ -419,7 +420,7 @@ async function loadListings() {
       c.innerHTML = `<div class="limg">${houseSVG()}<div class="limg-bar"></div></div>
         <div class="lcont">
           <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">${dateStr?`<span class="list-date">📅 Lists ${dateStr}</span>`:''}</div>
-          <div class="lprice">${r.price||''}</div>
+          <div class="lprice">${fmtPrice}</div>
           <div class="laddr">${r.address||''}</div>
           <div class="ldets">${r.beds?`<span class="ldet-pill">${r.beds} bd</span>`:''}${r.baths?`<span class="ldet-pill">${r.baths} ba</span>`:''}${r.sqft?`<span class="ldet-pill">${r.sqft} sqft</span>`:''}${r.garage?`<span class="ldet-pill">${r.garage}</span>`:''}</div>
           ${r.notes?`<div class="lnotes">${r.notes}</div>`:''}
