@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KW Lakeside — Agent Hub</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: sans-serif; background: #F5F5F3; color: #1A1A1A; min-height: 100vh; }
+:root {
+  --red: #CC0000; --red-dark: #A30000; --red-bg: #FFF8F8;
+  --gold-light: #F5EDD8; --gold-border: #E2CFA0;
+  --ink: #1A1A1A; --ink2: #4A4A4A; --ink3: #888;
+}
+.header { background: #fff; border-bottom: 1px solid rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+.header-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; }
+.logo-wrap { display: flex; align-items: center; gap: 13px; }
+.logo-mark { width: 42px; height: 42px; background: var(--red); border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo-mark span { color: white; font-family: Georgia, serif; font-weight: 900; font-size: 17px; letter-spacing: -0.5px; }
+.logo-divider { width: 1px; height: 34px; background: rgba(0,0,0,0.12); }
+.logo-name { color: var(--ink); font-size: 16px; font-weight: 700; font-family: Georgia, serif; letter-spacing: 0.5px; line-height: 1.2; }
+.logo-sub { color: var(--ink3); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+.hbtn { background: var(--red); color: white; border: none; border-radius: 3px; padding: 9px 18px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; letter-spacing: 1px; text-transform: uppercase; transition: background 0.15s; }
+.hbtn:hover { background: var(--red-dark); }
+.nav { display: flex; overflow-x: auto; scrollbar-width: none; border-top: 1px solid rgba(0,0,0,0.07); background: white; }
+.nav::-webkit-scrollbar { display: none; }
+.ntab { padding: 12px 20px; color: var(--ink3); font-size: 11px; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; font-weight: 600; flex-shrink: 0; transition: all 0.15s; letter-spacing: 1px; text-transform: uppercase; }
+.ntab:hover { color: var(--ink); }
+.ntab.active { color: var(--red); border-bottom-color: var(--red); font-weight: 700; }
+.main { padding: 28px 20px; max-width: 1000px; margin: 0 auto; }
+.page { display: none; }
+.page.active { display: block; }
+.ph { margin-bottom: 24px; }
+.ph-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.ptitle { font-size: 26px; font-weight: 700; color: var(--ink); font-family: Georgia, serif; margin-bottom: 4px; }
+.psub { font-size: 13px; color: var(--ink3); }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.scard { background: white; border-radius: 4px; border: 1px solid rgba(0,0,0,0.09); padding: 16px; position: relative; overflow: hidden; }
+.scard::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--red); }
+.snum { font-size: 30px; font-weight: 700; color: var(--ink); font-family: Georgia, serif; }
+.slabel { font-size: 10px; color: var(--ink3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.8px; }
+.fbar { display: flex; gap: 7px; margin-bottom: 18px; flex-wrap: wrap; }
+.fbtn { padding: 6px 14px; border-radius: 2px; font-size: 10px; font-weight: 700; cursor: pointer; border: 1px solid rgba(0,0,0,0.12); background: white; color: var(--ink3); transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.8px; }
+.fbtn.active, .fbtn:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 2px; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+.badge-green { background: #EAF8F0; color: #1a6e3a; }
+.badge-orange { background: #FFF4EB; color: #b85500; }
+.badge-blue { background: #EBF2FF; color: #1a4bb5; }
+.cs-banner { background: var(--red-bg); border-left: 3px solid var(--red); border-radius: 0 4px 4px 0; padding: 13px 18px; margin-bottom: 22px; display: flex; align-items: flex-start; gap: 10px; }
+.cs-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); flex-shrink: 0; margin-top: 5px; }
+.cs-text { font-size: 13px; color: var(--ink2); line-height: 1.6; }
+.lgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+.lcard { background: white; border-radius: 4px; border: 1px solid rgba(0,0,0,0.09); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+.lcard:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.09); }
+.limg { height: 118px; background: #F8F8F8; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.limg svg { opacity: 0.1; }
+.limg-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--red); }
+.lcont { padding: 16px; }
+.lprice { font-size: 21px; font-weight: 700; color: var(--red); font-family: Georgia, serif; margin-bottom: 3px; }
+.laddr { font-size: 13px; font-weight: 600; margin-bottom: 7px; color: var(--ink); }
+.ldets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ldet-pill { background: #F5F5F3; padding: 3px 8px; border-radius: 2px; font-size: 11px; color: var(--ink2); border: 1px solid rgba(0,0,0,0.07); }
+.lnotes { font-size: 12px; color: var(--ink3); margin-bottom: 11px; line-height: 1.6; }
+.lagent { display: flex; align-items: center; gap: 9px; padding-top: 11px; border-top: 1px solid rgba(0,0,0,0.07); }
+.av { width: 30px; height: 30px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.av-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.av-time { font-size: 11px; color: var(--ink3); }
+.list-date { display: inline-flex; align-items: center; gap: 5px; background: var(--gold-light); border: 1px solid var(--gold-border); border-radius: 2px; padding: 4px 9px; font-size: 11px; color: #7a5f20; font-weight: 600; }
+.ohcard { background: white; border-radius: 4px; border: 1px solid rgba(0,0,0,0.09); padding: 16px; margin-bottom: 12px; border-top: 3px solid var(--red); }
+.ohcard.covered { border-top-color: #1a6e3a; }
+.ohhead { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.ohaddr { font-size: 15px; font-weight: 700; font-family: Georgia, serif; color: var(--ink); }
+.ohprice { font-size: 13px; color: var(--red); font-weight: 700; margin-top: 2px; }
+.ohdets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.ohdet { font-size: 12px; color: var(--ink3); }
+.ohnotes { font-size: 12px; color: var(--ink2); margin-bottom: 10px; padding: 9px 12px; background: #F8F8F8; border-radius: 3px; border-left: 2px solid rgba(0,0,0,0.1); line-height: 1.6; }
+.ohfoot { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.07); }
+.oh-by { font-size: 12px; color: var(--ink3); }
+.hcard { background: white; border-radius: 4px; border: 1px solid rgba(0,0,0,0.09); padding: 16px; margin-bottom: 12px; display: flex; gap: 14px; }
+.hav { width: 52px; height: 52px; border-radius: 4px; background: var(--red); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 700; font-family: Georgia, serif; flex-shrink: 0; }
+.hname { font-size: 15px; font-weight: 700; font-family: Georgia, serif; color: var(--ink); margin-bottom: 3px; }
+.hmeta { font-size: 12px; color: var(--ink3); margin-bottom: 8px; }
+.htags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.htag { background: #F5F5F3; color: var(--ink2); font-size: 10px; padding: 3px 9px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.08); }
+.hactions { display: flex; gap: 8px; }
+.buyer-card { background: white; border-radius: 4px; border: 1px solid rgba(0,0,0,0.09); padding: 18px; margin-bottom: 14px; border-top: 3px solid var(--red); }
+.bc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+.bc-buyer { font-size: 17px; font-weight: 700; font-family: Georgia, serif; color: var(--ink); }
+.bc-agent { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.bc-budget { font-size: 18px; font-weight: 700; color: var(--red); font-family: Georgia, serif; }
+.bc-criteria { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.bc-crit { background: #F8F8F8; border-radius: 3px; padding: 9px 11px; border: 1px solid rgba(0,0,0,0.07); }
+.bc-crit-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--ink3); font-weight: 700; margin-bottom: 3px; }
+.bc-crit-val { font-size: 13px; font-weight: 600; color: var(--ink); }
+.bc-areas { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.bc-notes { font-size: 12px; color: var(--ink2); padding: 10px 13px; background: #F8F8F8; border-radius: 3px; margin-bottom: 12px; line-height: 1.6; border-left: 2px solid rgba(0,0,0,0.1); }
+.bc-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.07); flex-wrap: wrap; gap: 8px; }
+.bc-posted { font-size: 12px; color: var(--ink3); }
+.section-rule { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.section-rule-line { flex: 1; height: 1px; background: rgba(0,0,0,0.08); }
+.section-rule-text { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink3); }
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 10px 18px; border-radius: 3px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; }
+.btn-p { background: var(--red); color: white; }
+.btn-p:hover { background: var(--red-dark); }
+.btn-o { background: transparent; color: var(--red); border: 1px solid var(--red); }
+.btn-o:hover { background: var(--red-bg); }
+.btn-sm { padding: 7px 13px; font-size: 10px; }
+.btn-full { width: 100%; justify-content: center; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: flex-start; justify-content: center; padding: 20px; overflow-y: auto; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 4px; width: 100%; max-width: 520px; border: 1px solid rgba(0,0,0,0.1); margin: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+.mhead { padding: 16px 22px; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; }
+.mhead-rule { display: flex; align-items: center; gap: 10px; }
+.mhead-bar { width: 3px; height: 20px; background: var(--red); border-radius: 2px; }
+.mtitle { font-size: 13px; font-weight: 700; color: var(--ink); letter-spacing: 0.5px; text-transform: uppercase; }
+.mclose { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); background: transparent; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--ink3); }
+.mbody { padding: 20px 22px; }
+.fg { margin-bottom: 14px; }
+.fl { display: block; font-size: 10px; font-weight: 700; color: var(--ink3); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.8px; }
+.fi { width: 100%; padding: 10px 13px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.14); background: white; font-size: 14px; color: var(--ink); font-family: sans-serif; }
+.fi:focus { outline: none; border-color: var(--red); }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.req { color: var(--red); }
+.info-box { background: var(--red-bg); border-left: 3px solid var(--red); border-radius: 0 3px 3px 0; padding: 12px 15px; margin-bottom: 16px; font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.smsg { background: #EAF8F0; color: #1a6e3a; border-radius: 3px; padding: 11px 15px; font-size: 13px; margin-bottom: 12px; border-left: 3px solid #1a6e3a; display: none; }
+.emsg { background: #FFF0F0; color: var(--red); border-radius: 3px; padding: 11px 15px; font-size: 13px; margin-bottom: 12px; border-left: 3px solid var(--red); display: none; }
+.loading { text-align: center; padding: 48px 20px; color: var(--ink3); font-size: 13px; }
+.spinner { display: inline-block; width: 22px; height: 22px; border: 2px solid rgba(0,0,0,0.08); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 48px 20px; color: var(--ink3); }
+.empty-icon { font-size: 32px; margin-bottom: 10px; }
+.empty-text { font-size: 15px; font-weight: 600; color: var(--ink2); margin-bottom: 4px; font-family: Georgia, serif; }
+.empty-sub { font-size: 13px; }
+@media (max-width: 600px) {
+  .frow { grid-template-columns: 1fr; }
+  .lgrid { grid-template-columns: 1fr; }
+  .hcard { flex-direction: column; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .bc-criteria { grid-template-columns: 1fr 1fr; }
+  .header-top { padding: 12px 16px; }
+  .main { padding: 20px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo-wrap">
+      <div class="logo-mark"><span>KW</span></div>
+      <div class="logo-divider"></div>
+      <div>
+        <div class="logo-name">Lakeside</div>
+        <div class="logo-sub">Shelby Township, Michigan</div>
+      </div>
+    </div>
+    <button class="hbtn" id="main-post-btn" onclick="openModal('postModal')">+ Post Coming Soon</button>
+  </div>
+  <div class="nav">
+    <div class="ntab active" onclick="switchTab('listings',this)">Coming Soon</div>
+    <div class="ntab" onclick="switchTab('openhouses',this)">Open Houses</div>
+    <div class="ntab" onclick="switchTab('hosts',this)">Find a Host</div>
+    <div class="ntab" onclick="switchTab('buyers',this)">Buyer Needs</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- COMING SOON -->
+<div id="tab-listings" class="page active">
+  <div class="ph">
+    <div class="ph-row">
+      <div><div class="ptitle">Coming Soon</div><div class="psub">Pre-market listings — give your fellow agents a heads up before they hit the MLS</div></div>
+      <button class="btn btn-p" onclick="openModal('postModal')">+ Post Coming Soon</button>
+    </div>
+  </div>
+  <div class="cs-banner">
+    <div class="cs-dot"></div>
+    <div class="cs-text">These are pre-market listings shared agent-to-agent so we can organize and line up an agent if you need an open house covered, and to see if anyone has a buyer.</div>
+  </div>
+  <div class="stats-row">
+    <div class="scard"><div class="snum" id="stat-listings">—</div><div class="slabel">Coming Soon</div></div>
+    <div class="scard"><div class="snum" id="stat-listings-val">—</div><div class="slabel">Combined Value</div></div>
+  </div>
+  <div id="listings-grid" class="lgrid"><div class="loading"><div class="spinner"></div><br>Loading listings...</div></div>
+</div>
+
+<!-- OPEN HOUSES -->
+<div id="tab-openhouses" class="page">
+  <div class="ph">
+    <div class="ph-row">
+      <div><div class="ptitle">Open Houses</div><div class="psub">Post open houses that need coverage or claim one to host</div></div>
+      <button class="btn btn-p" onclick="openModal('ohModal')">+ Post Open House</button>
+    </div>
+  </div>
+  <div class="fbar">
+    <button class="fbtn active" onclick="filterOH('all',this)">All</button>
+    <button class="fbtn" onclick="filterOH('Needs Agent',this)">Needs Agent</button>
+    <button class="fbtn" onclick="filterOH('Covered',this)">Covered</button>
+  </div>
+  <div id="oh-list"><div class="loading"><div class="spinner"></div><br>Loading open houses...</div></div>
+</div>
+
+<!-- FIND A HOST -->
+<div id="tab-hosts" class="page">
+  <div class="ph">
+    <div class="ph-row">
+      <div><div class="ptitle">Find a Host</div><div class="psub">Agents available to host open houses and build their experience</div></div>
+      <button class="btn btn-p" onclick="openModal('hostSignupModal')">+ Add My Profile</button>
+    </div>
+  </div>
+  <div id="hosts-list"><div class="loading"><div class="spinner"></div><br>Loading hosts...</div></div>
+</div>
+
+<!-- BUYER NEEDS -->
+<div id="tab-buyers" class="page">
+  <div class="ph">
+    <div class="ph-row">
+      <div><div class="ptitle">Buyer Needs</div><div class="psub">Post what your client is looking for so other agents can match their listings</div></div>
+      <button class="btn btn-p" onclick="openModal('buyerModal')">+ Post Buyer Need</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="scard"><div class="snum" id="stat-buyers">—</div><div class="slabel">Active Buyers</div></div>
+    <div class="scard"><div class="snum" id="stat-buyers-val">—</div><div class="slabel">Combined Max Budget</div></div>
+  </div>
+  <div id="buyers-list"><div class="loading"><div class="spinner"></div><br>Loading buyer needs...</div></div>
+</div>
+
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal">
+    <div class="mhead"><div class="mhead-rule"><div class="mhead-bar"></div><div class="mtitle">Post a Coming Soon Listing</div></div><button class="mclose" onclick="closeModal('postModal')">✕</button></div>
+    <div class="mbody">
+      <div class="smsg" id="listing-success">✓ Listing saved! Refreshing the board...</div>
+      <div class="emsg" id="listing-error">⚠ Could not save. Please try again.</div>
+      <div class="info-box">Post your upcoming listing so we can organize and line up an agent if you need an open house covered, and to see if anyone has a buyer.</div>
+      <div class="fg"><label class="fl">Property Address <span class="req">*</span></label><input class="fi" id="l-address" placeholder="123 Main St, City, MI"></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">List Price <span class="req">*</span></label><input class="fi" id="l-price" placeholder="$450,000"></div>
+        <div class="fg"><label class="fl">Expected List Date <span class="req">*</span></label><input type="date" class="fi" id="l-date"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Bedrooms</label><input type="number" class="fi" id="l-beds" placeholder="4"></div>
+        <div class="fg"><label class="fl">Bathrooms</label><input type="number" class="fi" id="l-baths" placeholder="2.5"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Square Feet</label><input class="fi" id="l-sqft" placeholder="2,100"></div>
+        <div class="fg"><label class="fl">Garage</label><select class="fi" id="l-garage"><option value="">None / unknown</option><option>1-car garage</option><option>2-car garage</option><option>3-car garage</option></select></div>
+      </div>
+      <div class="fg"><label class="fl">Your Name <span class="req">*</span></label><input class="fi" id="l-agent" placeholder="Full name"></div>
+      <div class="fg"><label class="fl">Key Features / Notes</label><textarea class="fi" id="l-notes" rows="3" placeholder="Updates, highlights, anything agents should know..."></textarea></div>
+      <button class="btn btn-p btn-full" id="listing-btn" onclick="submitListing()">Post Coming Soon</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ohModal">
+  <div class="modal">
+    <div class="mhead"><div class="mhead-rule"><div class="mhead-bar"></div><div class="mtitle">Post an Open House</div></div><button class="mclose" onclick="closeModal('ohModal')">✕</button></div>
+    <div class="mbody">
+      <div class="smsg" id="oh-success">✓ Open house saved! Refreshing the board...</div>
+      <div class="emsg" id="oh-error">⚠ Could not save. Please try again.</div>
+      <div class="fg"><label class="fl">Property Address <span class="req">*</span></label><input class="fi" id="oh-address" placeholder="123 Main St, City, MI"></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">List Price</label><input class="fi" id="oh-price" placeholder="$450,000"></div>
+        <div class="fg"><label class="fl">Date <span class="req">*</span></label><input type="date" class="fi" id="oh-date"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Start Time <span class="req">*</span></label><input type="time" class="fi" id="oh-start"></div>
+        <div class="fg"><label class="fl">End Time</label><input type="time" class="fi" id="oh-end"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Bedrooms</label><input type="number" class="fi" id="oh-beds" placeholder="4"></div>
+        <div class="fg"><label class="fl">Bathrooms</label><input type="number" class="fi" id="oh-baths" placeholder="2.5"></div>
+      </div>
+      <div class="fg"><label class="fl">Your Name <span class="req">*</span></label><input class="fi" id="oh-agent" placeholder="Full name"></div>
+      <div class="fg"><label class="fl">Notes for Hosting Agent</label><textarea class="fi" id="oh-notes" rows="3" placeholder="Lockbox info, entry codes, seller instructions..."></textarea></div>
+      <button class="btn btn-p btn-full" id="oh-btn" onclick="submitOH()">Post Open House</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="hostSignupModal">
+  <div class="modal">
+    <div class="mhead"><div class="mhead-rule"><div class="mhead-bar"></div><div class="mtitle">Add Your Host Profile</div></div><button class="mclose" onclick="closeModal('hostSignupModal')">✕</button></div>
+    <div class="mbody">
+      <div class="smsg" id="host-success">✓ Profile saved! Refreshing the list...</div>
+      <div class="emsg" id="host-error">⚠ Could not save. Please try again.</div>
+      <div class="info-box">Add your profile so listing agents can find you to host their open houses.</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">First Name <span class="req">*</span></label><input class="fi" id="h-first" placeholder="First"></div>
+        <div class="fg"><label class="fl">Last Name <span class="req">*</span></label><input class="fi" id="h-last" placeholder="Last"></div>
+      </div>
+      <div class="fg"><label class="fl">Phone <span class="req">*</span></label><input type="tel" class="fi" id="h-phone" placeholder="(555) 000-0000"></div>
+      <div class="fg"><label class="fl">Email</label><input type="email" class="fi" id="h-email" placeholder="you@kwrealty.com"></div>
+      <div class="fg"><label class="fl">How long licensed?</label><select class="fi" id="h-tenure"><option>Less than 3 months</option><option>3–6 months</option><option>6–12 months</option><option>1–2 years</option></select></div>
+      <div class="fg"><label class="fl">Primary Service Area</label><input class="fi" id="h-area" placeholder="Sterling Heights, Shelby Twp, Troy..."></div>
+      <div class="fg"><label class="fl">Availability</label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;" id="avail-cb">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--red);"> Saturdays</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--red);"> Sundays</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--red);"> Weekdays</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--red);"> Flex / Anytime</label>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="h-notes" rows="2" placeholder="Buyer types, price ranges, languages spoken..."></textarea></div>
+      <button class="btn btn-p btn-full" id="host-btn" onclick="submitHost()">Add My Profile</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="buyerModal">
+  <div class="modal">
+    <div class="mhead"><div class="mhead-rule"><div class="mhead-bar"></div><div class="mtitle">Post a Buyer Need</div></div><button class="mclose" onclick="closeModal('buyerModal')">✕</button></div>
+    <div class="mbody">
+      <div class="smsg" id="buyer-success">✓ Buyer need saved! Refreshing the board...</div>
+      <div class="emsg" id="buyer-error">⚠ Could not save. Please try again.</div>
+      <div class="info-box">Post your buyer's property criteria so other agents can match their listings.</div>
+      <div class="fg"><label class="fl">Your Name <span class="req">*</span></label><input class="fi" id="b-agent" placeholder="Your full name"></div>
+      <div class="fg"><label class="fl">Your Phone</label><input type="tel" class="fi" id="b-phone" placeholder="(555) 000-0000"></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Min Price <span class="req">*</span></label><input class="fi" id="b-min" placeholder="$300,000"></div>
+        <div class="fg"><label class="fl">Max Price <span class="req">*</span></label><input class="fi" id="b-max" placeholder="$450,000"></div>
+      </div>
+      <div class="fg"><label class="fl">Target Cities / Areas <span class="req">*</span></label><input class="fi" id="b-areas" placeholder="Sterling Heights, Troy, Shelby Twp..."></div>
+      <div class="fg"><label class="fl">School District Preference</label><input class="fi" id="b-school" placeholder="e.g., Utica, Troy, Bloomfield Hills..."></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Home Style</label><input class="fi" id="b-style" placeholder="Ranch, Colonial, Split-level..."></div>
+        <div class="fg"><label class="fl">Min Sq. Footage</label><input class="fi" id="b-sqft" placeholder="1,800"></div>
+      </div>
+      <div class="fg"><label class="fl">Wants / Must-Haves</label><textarea class="fi" id="b-notes" rows="3" placeholder="Basement, fenced yard, 2-car garage, no HOA, first floor primary..."></textarea></div>
+      <div class="fg"><label class="fl">Timeline</label><select class="fi" id="b-timeline"><option>ASAP / 30 days</option><option>30–60 days</option><option>60–90 days</option><option>3–6 months</option><option>Flexible</option></select></div>
+      <button class="btn btn-p btn-full" id="buyer-btn" onclick="submitBuyer()">Post Buyer Need</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbzZ1KrcsmVpxXie-56PU_WIcuXHGH5i1EgF7S8nZnw3b-UiS7ruX2exyNkRmsOMXJtP/exec';
+
+const tabLabels = { listings:'+ Post Coming Soon', openhouses:'+ Post Open House', hosts:'+ Add My Profile', buyers:'+ Post Buyer Need' };
+const tabModals = { listings:'postModal', openhouses:'ohModal', hosts:'hostSignupModal', buyers:'buyerModal' };
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  el.classList.add('active');
+  const btn = document.getElementById('main-post-btn');
+  btn.textContent = tabLabels[tab];
+  btn.onclick = () => openModal(tabModals[tab]);
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+function showMsg(id) { const el = document.getElementById(id); el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3500); }
+function setBtnLoading(id, loading, label) { const b = document.getElementById(id); b.disabled = loading; b.textContent = loading ? 'Saving...' : label; }
+
+async function post(data) {
+  const r = await fetch(API, { method:'POST', body: JSON.stringify(data) });
+  const j = await r.json();
+  if (!j.success) throw new Error(j.error);
+}
+
+function fmtMoney(n) {
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '$' + Math.round(n/1000) + 'K';
+  return '$' + n;
+}
+
+function houseSVG() {
+  return `<svg width="64" height="64" viewBox="0 0 48 48"><path d="M24 6L3 23h7v19h11V30h6v12h11V23h7L24 6z" fill="#1A1A1A" opacity="0.1"/></svg>`;
+}
+
+// ── LISTINGS ──
+async function loadListings() {
+  const grid = document.getElementById('listings-grid');
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading listings...</div>';
+  try {
+    const data = await (await fetch(API + '?tab=coming_soon')).json();
+    grid.innerHTML = '';
+    if (!Array.isArray(data) || !data.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div><div class="empty-text">No listings yet</div><div class="empty-sub">Be the first to post a coming soon listing</div></div>';
+      document.getElementById('stat-listings').textContent = '0';
+      document.getElementById('stat-listings-val').textContent = '$0';
+      return;
+    }
+    document.getElementById('stat-listings').textContent = data.length;
+    let total = 0;
+    [...data].reverse().forEach(r => {
+      const price = parseFloat((r.price||'').replace(/[^0-9.]/g,'')) || 0;
+      total += price;
+      const init = r.agentName ? r.agentName.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '??';
+      let dateStr = '';
+      if (r.listDate) {
+        try { dateStr = new Date(r.listDate + (r.listDate.includes('T')?'':'T00:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){}
+      }
+      const c = document.createElement('div'); c.className = 'lcard';
+      c.innerHTML = `<div class="limg">${houseSVG()}<div class="limg-bar"></div></div>
+        <div class="lcont">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">${dateStr?`<span class="list-date">📅 Lists ${dateStr}</span>`:''}</div>
+          <div class="lprice">${r.price||''}</div>
+          <div class="laddr">${r.address||''}</div>
+          <div class="ldets">${r.beds?`<span class="ldet-pill">${r.beds} bd</span>`:''}${r.baths?`<span class="ldet-pill">${r.baths} ba</span>`:''}${r.sqft?`<span class="ldet-pill">${r.sqft} sqft</span>`:''}${r.garage?`<span class="ldet-pill">${r.garage}</span>`:''}</div>
+          ${r.notes?`<div class="lnotes">${r.notes}</div>`:''}
+          <div class="lagent"><div class="av">${init}</div><div><div class="av-name">${r.agentName||''}</div><div class="av-time">${r.timestamp||''}</div></div></div>
+        </div>`;
+      grid.appendChild(c);
+    });
+    document.getElementById('stat-listings-val').textContent = total ? fmtMoney(total) : '—';
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load listings</div><div class="empty-sub">Check connection and refresh the page</div></div>';
+  }
+}
+
+async function submitListing() {
+  const addr = document.getElementById('l-address').value.trim();
+  const price = document.getElementById('l-price').value.trim();
+  const agent = document.getElementById('l-agent').value.trim();
+  const dateVal = document.getElementById('l-date').value;
+  if (!addr || !price || !agent || !dateVal) { alert('Please fill in all required fields.'); return; }
+  setBtnLoading('listing-btn', true, 'Post Coming Soon');
+  try {
+    await post({ type:'coming_soon', address:addr, price, listDate:dateVal, beds:document.getElementById('l-beds').value, baths:document.getElementById('l-baths').value, sqft:document.getElementById('l-sqft').value, garage:document.getElementById('l-garage').value, agentName:agent, notes:document.getElementById('l-notes').value });
+    showMsg('listing-success');
+    ['l-address','l-price','l-agent','l-beds','l-baths','l-sqft','l-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('l-date').value = '';
+    document.getElementById('l-garage').value = '';
+    setTimeout(() => { closeModal('postModal'); loadListings(); }, 2000);
+  } catch(e) { showMsg('listing-error'); }
+  setBtnLoading('listing-btn', false, 'Post Coming Soon');
+}
+
+// ── OPEN HOUSES ──
+async function loadOpenHouses() {
+  const list = document.getElementById('oh-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading open houses...</div>';
+  try {
+    const data = await (await fetch(API + '?tab=open_houses')).json();
+    list.innerHTML = '';
+    if (!Array.isArray(data) || !data.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">🏡</div><div class="empty-text">No open houses posted yet</div><div class="empty-sub">Post one to find an agent to host</div></div>';
+      return;
+    }
+    const fmt12 = t => {
+      if (!t) return '';
+      const str = t.toString().trim();
+      if (str.includes('AM') || str.includes('PM')) return str;
+      const parts = str.split(':');
+      const hr = parseInt(parts[0]), mn = parts[1]||'00';
+      return `${hr > 12 ? hr-12 : hr || 12}:${mn} ${hr >= 12 ? 'PM' : 'AM'}`;
+    };
+    [...data].reverse().forEach(r => {
+      const isCovered = (r.status||'').toString().trim() === 'Covered';
+      let dateStr = '';
+      if (r.date) {
+        try { dateStr = new Date(r.date + (r.date.includes('T')?'':'T00:00:00')).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); } catch(e){}
+      }
+      const addrSafe = (r.address||'').replace(/'/g,"\\'");
+      const c = document.createElement('div');
+      c.className = 'ohcard' + (isCovered ? ' covered' : '');
+      c.dataset.status = isCovered ? 'Covered' : 'Needs Agent';
+      c.innerHTML = `<div class="ohhead"><div><div class="ohaddr">${r.address||''}</div><div class="ohprice">${r.price||''}</div></div><span class="badge ${isCovered?'badge-green':'badge-orange'}">${isCovered?'Covered':'Needs Agent'}</span></div>
+        <div class="ohdets">${dateStr?`<span class="ohdet">📅 ${dateStr}</span><span class="ohdet">&nbsp;·&nbsp;</span>`:''}<span class="ohdet">${fmt12(r.startTime)}${r.endTime?' – '+fmt12(r.endTime):''}</span>${(r.beds||r.baths)?`<span class="ohdet">&nbsp;·&nbsp;</span><span class="ohdet">${r.beds?r.beds+' bd':''}${r.beds&&r.baths?' / ':''}${r.baths?r.baths+' ba':''}</span>`:''}</div>
+        ${r.notes||r.claimedBy?`<div class="ohnotes">${isCovered&&r.claimedBy?'Hosted by: '+r.claimedBy:(r.notes||'')}</div>`:''}
+        <div class="ohfoot"><div class="oh-by">Listed by ${r.agentName||''}</div>${isCovered?`<span style="font-size:12px;color:#1a6e3a;font-weight:700;">✓ ${r.claimedBy?'Claimed by '+r.claimedBy:'Agent Confirmed'}</span>`:`<button class="btn btn-p btn-sm" onclick="claimOH(this,'${addrSafe}')">Claim This Open House</button>`}</div>`;
+      list.appendChild(c);
+    });
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load open houses</div></div>';
+  }
+}
+
+async function submitOH() {
+  const addr = document.getElementById('oh-address').value.trim();
+  const agent = document.getElementById('oh-agent').value.trim();
+  const date = document.getElementById('oh-date').value;
+  const start = document.getElementById('oh-start').value;
+  if (!addr || !agent || !date || !start) { alert('Please fill in all required fields.'); return; }
+  setBtnLoading('oh-btn', true, 'Post Open House');
+  try {
+    await post({ type:'open_house', address:addr, price:document.getElementById('oh-price').value, date, startTime:start, endTime:document.getElementById('oh-end').value, beds:document.getElementById('oh-beds').value, baths:document.getElementById('oh-baths').value, agentName:agent, notes:document.getElementById('oh-notes').value });
+    showMsg('oh-success');
+    ['oh-address','oh-price','oh-date','oh-start','oh-end','oh-beds','oh-baths','oh-agent','oh-notes'].forEach(id => document.getElementById(id).value = '');
+    setTimeout(() => { closeModal('ohModal'); loadOpenHouses(); }, 2000);
+  } catch(e) { showMsg('oh-error'); }
+  setBtnLoading('oh-btn', false, 'Post Open House');
+}
+
+async function claimOH(btn, address) {
+  const name = prompt('Enter your name to claim this open house:');
+  if (!name) return;
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    await post({ type:'claim_open_house', address, claimedBy:name });
+    loadOpenHouses();
+  } catch(e) {
+    alert('Could not save. Please try again.');
+    btn.disabled = false; btn.textContent = 'Claim This Open House';
+  }
+}
+
+function filterOH(status, btn) {
+  btn.closest('.fbar').querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#oh-list .ohcard').forEach(c => {
+    c.style.display = (status === 'all' || c.dataset.status === status) ? '' : 'none';
+  });
+}
+
+// ── HOSTS ──
+async function loadHosts() {
+  const list = document.getElementById('hosts-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading hosts...</div>';
+  try {
+    const data = await (await fetch(API + '?tab=hosts')).json();
+    list.innerHTML = '';
+    if (!Array.isArray(data) || !data.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">No hosts added yet</div><div class="empty-sub">New agents — add your profile to get started</div></div>';
+      return;
+    }
+    [...data].reverse().forEach(r => {
+      const init = ((r.firstName||'?')[0] + (r.lastName||'?')[0]).toUpperCase();
+      const tags = r.availability ? r.availability.split(',').map(a => `<span class="htag">${a.trim()}</span>`).join('') : '';
+      const c = document.createElement('div'); c.className = 'hcard';
+      c.innerHTML = `<div class="hav">${init}</div>
+        <div style="flex:1;">
+          <div class="hname">${r.firstName||''} ${r.lastName||''}</div>
+          <div class="hmeta">${r.howLong||''} licensed${r.serviceArea?' · '+r.serviceArea:''}</div>
+          <div class="htags">${tags}</div>
+          ${r.notes?`<div style="font-size:12px;color:var(--ink3);margin-bottom:10px;line-height:1.5;">${r.notes}</div>`:''}
+          <div class="hactions">
+            ${r.phone?`<a class="btn btn-p btn-sm" href="tel:${r.phone}">📞 Call</a>`:''}
+            ${r.email?`<a class="btn btn-o btn-sm" href="mailto:${r.email}">Email</a>`:''}
+          </div>
+        </div>`;
+      list.appendChild(c);
+    });
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load hosts</div></div>';
+  }
+}
+
+async function submitHost() {
+  const first = document.getElementById('h-first').value.trim();
+  const last = document.getElementById('h-last').value.trim();
+  const phone = document.getElementById('h-phone').value.trim();
+  if (!first || !last || !phone) { alert('Please fill in all required fields.'); return; }
+  const avail = [...document.querySelectorAll('#avail-cb input:checked')].map(c => c.parentElement.textContent.trim()).join(', ');
+  setBtnLoading('host-btn', true, 'Add My Profile');
+  try {
+    await post({ type:'host', firstName:first, lastName:last, phone, email:document.getElementById('h-email').value, howLong:document.getElementById('h-tenure').value, serviceArea:document.getElementById('h-area').value, availability:avail, notes:document.getElementById('h-notes').value });
+    showMsg('host-success');
+    ['h-first','h-last','h-phone','h-email','h-area','h-notes'].forEach(id => document.getElementById(id).value = '');
+    document.querySelectorAll('#avail-cb input').forEach(c => c.checked = false);
+    setTimeout(() => { closeModal('hostSignupModal'); loadHosts(); }, 2000);
+  } catch(e) { showMsg('host-error'); }
+  setBtnLoading('host-btn', false, 'Add My Profile');
+}
+
+// ── BUYER NEEDS ──
+async function loadBuyers() {
+  const list = document.getElementById('buyers-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading buyer needs...</div>';
+  try {
+    const data = await (await fetch(API + '?tab=buyer_needs')).json();
+    list.innerHTML = '';
+    if (!Array.isArray(data) || !data.length) {
+      list.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">No buyer needs posted yet</div><div class="empty-sub">Post your buyer\'s criteria to find a match</div></div>';
+      document.getElementById('stat-buyers').textContent = '0';
+      document.getElementById('stat-buyers-val').textContent = '—';
+      return;
+    }
+    document.getElementById('stat-buyers').textContent = data.length;
+    let totalMax = 0;
+    [...data].reverse().forEach(r => {
+      const maxVal = parseFloat((r.maxPrice||'').replace(/[^0-9.]/g,'')) || 0;
+      totalMax += maxVal;
+      const areaList = r.areas ? r.areas.split(',').map(a => `<span class="badge badge-blue">${a.trim()}</span>`).join(' ') : '';
+      const crits = [
+        (r.minPrice && r.maxPrice) ? {l:'Price Range', v:`${r.minPrice} – ${r.maxPrice}`} : (r.maxPrice ? {l:'Max Price', v:r.maxPrice} : null),
+        r.minSqft ? {l:'Min Sq. Ft.', v:r.minSqft+' sqft'} : null,
+        r.homeStyle ? {l:'Home Style', v:r.homeStyle} : null,
+        r.schoolDistrict ? {l:'School Dist.', v:r.schoolDistrict} : null,
+        r.timeline ? {l:'Timeline', v:r.timeline} : null
+      ].filter(Boolean);
+      const budget = r.minPrice ? `${r.minPrice} – ${r.maxPrice}` : r.maxPrice;
+      const phoneSafe = (r.phone||'').replace(/'/g,"\\'");
+      const nameSafe = (r.agentName||'').replace(/'/g,"\\'");
+      const c = document.createElement('div'); c.className = 'buyer-card';
+      c.innerHTML = `<div class="bc-top">
+          <div><div class="bc-buyer">Buyer Need</div><div class="bc-agent">Posted by ${r.agentName||''}</div></div>
+          <div style="text-align:right;"><div class="bc-budget">${budget||''}</div></div>
+        </div>
+        <div class="bc-criteria">${crits.map(cr=>`<div class="bc-crit"><div class="bc-crit-label">${cr.l}</div><div class="bc-crit-val">${cr.v}</div></div>`).join('')}</div>
+        <div class="section-rule"><div class="section-rule-line"></div><div class="section-rule-text">Target Areas</div><div class="section-rule-line"></div></div>
+        <div class="bc-areas">${areaList}</div>
+        ${r.wants?`<div class="bc-notes">${r.wants}</div>`:''}
+        <div class="bc-foot">
+          <div class="bc-posted">${r.timestamp||''}${r.phone?' · '+r.phone:''}</div>
+          <button class="btn btn-p btn-sm" onclick="alert('Contact ${nameSafe}${phoneSafe?' at '+phoneSafe:''}')">I Have a Match</button>
+        </div>`;
+      list.appendChild(c);
+    });
+    document.getElementById('stat-buyers-val').textContent = totalMax ? fmtMoney(totalMax) : '—';
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load buyer needs</div></div>';
+  }
+}
+
+async function submitBuyer() {
+  const agent = document.getElementById('b-agent').value.trim();
+  const bmax = document.getElementById('b-max').value.trim();
+  const areas = document.getElementById('b-areas').value.trim();
+  if (!agent || !bmax || !areas) { alert('Please fill in all required fields.'); return; }
+  setBtnLoading('buyer-btn', true, 'Post Buyer Need');
+  try {
+    await post({ type:'buyer_need', agentName:agent, phone:document.getElementById('b-phone').value, minPrice:document.getElementById('b-min').value, maxPrice:bmax, areas, schoolDistrict:document.getElementById('b-school').value, homeStyle:document.getElementById('b-style').value, minSqft:document.getElementById('b-sqft').value, wants:document.getElementById('b-notes').value, timeline:document.getElementById('b-timeline').value });
+    showMsg('buyer-success');
+    ['b-agent','b-phone','b-min','b-max','b-sqft','b-style','b-school','b-areas','b-notes'].forEach(id => document.getElementById(id).value = '');
+    setTimeout(() => { closeModal('buyerModal'); loadBuyers(); }, 2000);
+  } catch(e) { showMsg('buyer-error'); }
+  setBtnLoading('buyer-btn', false, 'Post Buyer Need');
+}
+
+// Boot
+loadListings();
+loadOpenHouses();
+loadHosts();
+loadBuyers();
+</script>
+</body>
+</html>
