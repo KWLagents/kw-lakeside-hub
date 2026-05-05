@@ -339,7 +339,7 @@ body { font-family: sans-serif; background: #F5F5F3; color: #1A1A1A; min-height:
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbxUpJfSJrXQi_YSRQxHqUXq2mJ7XDZP--2A0dcYgH-Bfa4goSizgfSVeqz2nMjwoF1f/exec';
+const API = 'https://script.google.com/macros/s/AKfycbyjGopzO6531EKrlrHxS98OOJ1q62oV9O_JsxkIil8X7P_nHiwAmW3OrEF1ukW1mrXu/exec';
 
 const tabLabels = { listings:'+ Post Coming Soon', openhouses:'+ Post Open House', hosts:'+ Add My Profile', buyers:'+ Post Buyer Need' };
 const tabModals = { listings:'postModal', openhouses:'ohModal', hosts:'hostSignupModal', buyers:'buyerModal' };
@@ -359,10 +359,27 @@ document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('cli
 function showMsg(id) { const el = document.getElementById(id); el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3500); }
 function setBtnLoading(id, loading, label) { const b = document.getElementById(id); b.disabled = loading; b.textContent = loading ? 'Saving...' : label; }
 
+function loadJSON(tab) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'kwcb_' + Math.random().toString(36).slice(2);
+    const existing = document.getElementById('jsonp_script');
+    if (existing) existing.remove();
+    window[cbName] = function(data) {
+      delete window[cbName];
+      const s = document.getElementById('jsonp_script');
+      if (s) s.remove();
+      resolve(data);
+    };
+    const script = document.createElement('script');
+    script.id = 'jsonp_script';
+    script.src = API + '?tab=' + tab + '&callback=' + cbName;
+    script.onerror = () => reject(new Error('Failed to load'));
+    document.head.appendChild(script);
+  });
+}
+
 async function post(data) {
-  const r = await fetch(API, { method:'POST', body: JSON.stringify(data) });
-  const j = await r.json();
-  if (!j.success) throw new Error(j.error);
+  await fetch(API, { method:'POST', mode:'no-cors', body: JSON.stringify(data) });
 }
 
 function fmtMoney(n) {
@@ -380,7 +397,7 @@ async function loadListings() {
   const grid = document.getElementById('listings-grid');
   grid.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading listings...</div>';
   try {
-    const data = await (await fetch(API + '?tab=coming_soon')).json();
+    const data = await loadJSON('coming_soon');
     grid.innerHTML = '';
     if (!Array.isArray(data) || !data.length) {
       grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🏠</div><div class="empty-text">No listings yet</div><div class="empty-sub">Be the first to post a coming soon listing</div></div>';
@@ -439,7 +456,7 @@ async function loadOpenHouses() {
   const list = document.getElementById('oh-list');
   list.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading open houses...</div>';
   try {
-    const data = await (await fetch(API + '?tab=open_houses')).json();
+    const data = await loadJSON('open_houses');
     list.innerHTML = '';
     if (!Array.isArray(data) || !data.length) {
       list.innerHTML = '<div class="empty-state"><div class="empty-icon">🏡</div><div class="empty-text">No open houses posted yet</div><div class="empty-sub">Post one to find an agent to host</div></div>';
@@ -516,7 +533,7 @@ async function loadHosts() {
   const list = document.getElementById('hosts-list');
   list.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading hosts...</div>';
   try {
-    const data = await (await fetch(API + '?tab=hosts')).json();
+    const data = await loadJSON('hosts');
     list.innerHTML = '';
     if (!Array.isArray(data) || !data.length) {
       list.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">No hosts added yet</div><div class="empty-sub">New agents — add your profile to get started</div></div>';
@@ -566,7 +583,7 @@ async function loadBuyers() {
   const list = document.getElementById('buyers-list');
   list.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading buyer needs...</div>';
   try {
-    const data = await (await fetch(API + '?tab=buyer_needs')).json();
+    const data = await loadJSON('buyer_needs');
     list.innerHTML = '';
     if (!Array.isArray(data) || !data.length) {
       list.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">No buyer needs posted yet</div><div class="empty-sub">Post your buyer\'s criteria to find a match</div></div>';
