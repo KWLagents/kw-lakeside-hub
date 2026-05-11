@@ -673,17 +673,18 @@ async function loadBuyers() {
     document.getElementById('stat-buyers').textContent = data.length;
     let totalMax = 0;
     [...data].reverse().forEach(r => {
-      const maxVal = parseFloat((r.maxPrice||'').replace(/[^0-9.]/g,'')) || 0;
+      const maxVal = parseFloat((r.maxPrice||'').toString().replace(/[^0-9.]/g,'')) || 0;
       totalMax += maxVal;
       const areaList = r.areas ? r.areas.split(',').map(a => `<span class="badge badge-blue">${a.trim()}</span>`).join(' ') : '';
       const crits = [
-        (r.minPrice && r.maxPrice) ? {l:'Price Range', v:`${r.minPrice} – ${r.maxPrice}`} : (r.maxPrice ? {l:'Max Price', v:r.maxPrice} : null),
+        (r.minPrice && r.maxPrice) ? {l:'Price Range', v:`${fmtNum(r.minPrice)} – ${fmtNum(r.maxPrice)}`} : (r.maxPrice ? {l:'Max Price', v:fmtNum(r.maxPrice)} : null),
         r.minSqft ? {l:'Min Sq. Ft.', v:r.minSqft+' sqft'} : null,
         r.homeStyle ? {l:'Home Style', v:r.homeStyle} : null,
         r.schoolDistrict ? {l:'School Dist.', v:r.schoolDistrict} : null,
         r.timeline ? {l:'Timeline', v:r.timeline} : null
       ].filter(Boolean);
-      const budget = r.minPrice ? `${r.minPrice} – ${r.maxPrice}` : r.maxPrice;
+      const fmtNum = v => { const n = parseFloat((v||'').toString().replace(/[^0-9.]/g,'')); return n ? '$' + n.toLocaleString('en-US') : ''; };
+      const budget = r.minPrice ? `${fmtNum(r.minPrice)} – ${fmtNum(r.maxPrice)}` : fmtNum(r.maxPrice);
       const phoneSafe = (r.phone||'').replace(/'/g,"\\'");
       const nameSafe = (r.agentName||'').replace(/'/g,"\\'");
       const c = document.createElement('div'); c.className = 'buyer-card';
