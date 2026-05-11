@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -140,6 +141,20 @@ body { font-family: sans-serif; background: #F5F5F3; color: #1A1A1A; min-height:
   .header-top { padding: 12px 16px; }
   .main { padding: 20px 14px; }
 }
+
+.month-header { margin-bottom: 12px; margin-top: 8px; cursor: pointer; user-select: none; }
+.month-header:first-child { margin-top: 0; }
+.month-header-inner { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: white; border-radius: 4px; border: 1px solid rgba(0,0,0,0.09); border-left: 3px solid var(--red); }
+.month-header-inner:hover { background: var(--red-bg); }
+.month-title { font-size: 15px; font-weight: 700; font-family: Georgia, serif; color: var(--ink); flex: 1; }
+.month-meta { font-size: 11px; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+.month-toggle { font-size: 11px; color: var(--red); font-weight: 700; }
+.month-grid { margin-bottom: 20px; }
+
+.bc-areas-header { margin-bottom: 14px; }
+.bc-areas-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--ink3); margin-bottom: 8px; }
+.bc-areas-big { display: flex; flex-wrap: wrap; gap: 7px; }
+.bc-area-badge { font-size: 12px !important; padding: 5px 14px !important; border-radius: 3px; font-weight: 700; letter-spacing: 0.3px; }
 </style>
 </head>
 <body>
@@ -158,9 +173,9 @@ body { font-family: sans-serif; background: #F5F5F3; color: #1A1A1A; min-height:
   </div>
   <div class="nav">
     <div class="ntab active" onclick="switchTab('listings',this)">Coming Soon</div>
+    <div class="ntab" onclick="switchTab('buyers',this)">Buyer Needs</div>
     <div class="ntab" onclick="switchTab('openhouses',this)">Open Houses</div>
     <div class="ntab" onclick="switchTab('hosts',this)">Find a Host</div>
-    <div class="ntab" onclick="switchTab('buyers',this)">Buyer Needs</div>
   </div>
 </div>
 
@@ -179,10 +194,10 @@ body { font-family: sans-serif; background: #F5F5F3; color: #1A1A1A; min-height:
     <div class="cs-text">These are pre-market listings shared agent-to-agent so we can organize and line up an agent if you need an open house covered, and to see if anyone has a buyer.</div>
   </div>
   <div class="stats-row">
-    <div class="scard"><div class="snum" id="stat-listings">—</div><div class="slabel">Coming Soon</div></div>
+    <div class="scard"><div class="snum" id="stat-listings">—</div><div class="slabel" id="stat-listings-label">Coming Soon This Month</div></div>
     <div class="scard"><div class="snum" id="stat-listings-val">—</div><div class="slabel">Combined Value</div></div>
   </div>
-  <div id="listings-grid" class="lgrid"><div class="loading"><div class="spinner"></div><br>Loading listings...</div></div>
+  <div id="listings-grid"><div class="loading"><div class="spinner"></div><br>Loading listings...</div></div>
 </div>
 
 <!-- OPEN HOUSES -->
@@ -251,6 +266,7 @@ body { font-family: sans-serif; background: #F5F5F3; color: #1A1A1A; min-height:
         <div class="fg"><label class="fl">Garage</label><select class="fi" id="l-garage"><option value="">None / unknown</option><option>1-car garage</option><option>2-car garage</option><option>3-car garage</option></select></div>
       </div>
       <div class="fg"><label class="fl">Your Name <span class="req">*</span></label><input class="fi" id="l-agent" placeholder="Full name"></div>
+      <div class="fg"><label class="fl">Your Phone <span class="req">*</span></label><input type="tel" class="fi" id="l-phone" placeholder="(555) 000-0000"></div>
       <div class="fg"><label class="fl">Key Features / Notes</label><textarea class="fi" id="l-notes" rows="3" placeholder="Updates, highlights, anything agents should know..."></textarea></div>
       <button class="btn btn-p btn-full" id="listing-btn" onclick="submitListing()">Post Coming Soon</button>
     </div>
@@ -339,7 +355,7 @@ body { font-family: sans-serif; background: #F5F5F3; color: #1A1A1A; min-height:
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbyjGopzO6531EKrlrHxS98OOJ1q62oV9O_JsxkIil8X7P_nHiwAmW3OrEF1ukW1mrXu/exec';
+const API = 'https://script.google.com/macros/s/AKfycby570pZbyrwHTjK-c4ksyJEtSsrlQipXGLbygY3opYDfjNp7YL0Iz9WCOa9jf3hnP1t/exec';
 
 const tabLabels = { listings:'+ Post Coming Soon', openhouses:'+ Post Open House', hosts:'+ Add My Profile', buyers:'+ Post Buyer Need' };
 const tabModals = { listings:'postModal', openhouses:'ohModal', hosts:'hostSignupModal', buyers:'buyerModal' };
@@ -405,30 +421,91 @@ async function loadListings() {
       document.getElementById('stat-listings-val').textContent = '$0';
       return;
     }
-    document.getElementById('stat-listings').textContent = data.length;
+
+    // Group by list month
+    const months = {};
     let total = 0;
-    [...data].reverse().forEach(r => {
+    [...data].forEach(r => {
       const price = parseFloat((r.price||'').toString().replace(/[^0-9.]/g,'')) || 0;
       total += price;
-      const fmtPrice = price ? '$' + price.toLocaleString('en-US') : (r.price||'');
-      const init = r.agentName ? r.agentName.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '??';
-      let dateStr = '';
+      let monthKey = 'Unknown';
+      let monthSort = '9999-99';
       if (r.listDate) {
-        try { dateStr = new Date(r.listDate + (r.listDate.includes('T')?'':'T00:00:00')).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){}
+        try {
+          const d = new Date(r.listDate);
+          monthKey = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          monthSort = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+        } catch(e) {}
       }
-      const c = document.createElement('div'); c.className = 'lcard';
-      c.innerHTML = `<div class="limg">${houseSVG()}<div class="limg-bar"></div></div>
-        <div class="lcont">
-          <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">${dateStr?`<span class="list-date">📅 Lists ${dateStr}</span>`:''}</div>
-          <div class="lprice">${fmtPrice}</div>
-          <div class="laddr">${r.address||''}</div>
-          <div class="ldets">${r.beds?`<span class="ldet-pill">${r.beds} bd</span>`:''}${r.baths?`<span class="ldet-pill">${r.baths} ba</span>`:''}${r.sqft?`<span class="ldet-pill">${r.sqft} sqft</span>`:''}${r.garage?`<span class="ldet-pill">${r.garage}</span>`:''}</div>
-          ${r.notes?`<div class="lnotes">${r.notes}</div>`:''}
-          <div class="lagent"><div class="av">${init}</div><div><div class="av-name">${r.agentName||''}</div><div class="av-time">${r.timestamp||''}</div></div></div>
-        </div>`;
-      grid.appendChild(c);
+      if (!months[monthKey]) months[monthKey] = { sort: monthSort, listings: [] };
+      months[monthKey].listings.push(r);
     });
+
+    // Count only listings for current month
+    const now = new Date();
+    const thisMonthKey = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const thisMonthCount = data.filter(r => {
+      if (!r.listDate) return false;
+      try {
+        const d = new Date(r.listDate);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      } catch(e) { return false; }
+    }).length;
+    document.getElementById('stat-listings').textContent = thisMonthCount;
     document.getElementById('stat-listings-val').textContent = total ? fmtMoney(total) : '—';
+
+    // Sort months chronologically
+    const sortedMonths = Object.keys(months).sort((a,b) => months[a].sort.localeCompare(months[b].sort));
+
+    sortedMonths.forEach((monthKey, idx) => {
+      const group = months[monthKey];
+
+      // Month header — collapsible
+      const header = document.createElement('div');
+      header.className = 'month-header';
+      header.innerHTML = `<div class="month-header-inner">
+        <div class="month-title">${monthKey}</div>
+        <div class="month-meta">${group.listings.length} listing${group.listings.length !== 1 ? 's' : ''}</div>
+        <div class="month-toggle">▲</div>
+      </div>`;
+      grid.appendChild(header);
+
+      // Cards grid for this month
+      const monthGrid = document.createElement('div');
+      monthGrid.className = 'lgrid month-grid';
+      monthGrid.id = 'month-' + idx;
+
+      group.listings.forEach(r => {
+        const price = parseFloat((r.price||'').toString().replace(/[^0-9.]/g,'')) || 0;
+        const fmtPrice = price ? '$' + price.toLocaleString('en-US') : (r.price||'');
+        const init = r.agentName ? r.agentName.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '??';
+        let dateStr = '';
+        if (r.listDate) {
+          try { dateStr = new Date(r.listDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch(e){}
+        }
+        const c = document.createElement('div'); c.className = 'lcard';
+        c.innerHTML = `<div class="limg">${houseSVG()}<div class="limg-bar"></div></div>
+          <div class="lcont">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">${dateStr?`<span class="list-date">📅 Lists ${dateStr}</span>`:''}</div>
+            <div class="lprice">${fmtPrice}</div>
+            <div class="laddr">${r.address||''}</div>
+            <div class="ldets">${r.beds?`<span class="ldet-pill">${r.beds} bd</span>`:''}${r.baths?`<span class="ldet-pill">${r.baths} ba</span>`:''}${r.sqft?`<span class="ldet-pill">${r.sqft} sqft</span>`:''}${r.garage?`<span class="ldet-pill">${r.garage}</span>`:''}</div>
+            ${r.notes?`<div class="lnotes">${r.notes}</div>`:''}
+            <div class="lagent"><div class="av">${init}</div><div><div class="av-name">${r.agentName||''}</div><div class="av-time">${r.phone ? r.phone + ' · ' : ''}${r.timestamp||''}</div></div></div>
+          </div>`;
+        monthGrid.appendChild(c);
+      });
+
+      grid.appendChild(monthGrid);
+
+      // Toggle collapse on click
+      header.addEventListener('click', () => {
+        const isOpen = monthGrid.style.display !== 'none';
+        monthGrid.style.display = isOpen ? 'none' : 'grid';
+        header.querySelector('.month-toggle').textContent = isOpen ? '▼' : '▲';
+      });
+    });
+
   } catch(e) {
     grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load listings</div><div class="empty-sub">Check connection and refresh the page</div></div>';
   }
@@ -442,7 +519,7 @@ async function submitListing() {
   if (!addr || !price || !agent || !dateVal) { alert('Please fill in all required fields.'); return; }
   setBtnLoading('listing-btn', true, 'Post Coming Soon');
   try {
-    await post({ type:'coming_soon', address:addr, price, listDate:dateVal, beds:document.getElementById('l-beds').value, baths:document.getElementById('l-baths').value, sqft:document.getElementById('l-sqft').value, garage:document.getElementById('l-garage').value, agentName:agent, notes:document.getElementById('l-notes').value });
+    await post({ type:'coming_soon', address:addr, price, listDate:dateVal, beds:document.getElementById('l-beds').value, baths:document.getElementById('l-baths').value, sqft:document.getElementById('l-sqft').value, garage:document.getElementById('l-garage').value, agentName:agent, phone:document.getElementById('l-phone').value, notes:document.getElementById('l-notes').value });
     showMsg('listing-success');
     ['l-address','l-price','l-agent','l-beds','l-baths','l-sqft','l-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('l-date').value = '';
@@ -473,6 +550,8 @@ async function loadOpenHouses() {
     };
     [...data].reverse().forEach(r => {
       const isCovered = (r.status||'').toString().trim() === 'Covered';
+      const ohPriceNum = parseFloat((r.price||'').toString().replace(/[^0-9.]/g,'')) || 0;
+      const ohFmtPrice = ohPriceNum ? '$' + ohPriceNum.toLocaleString('en-US') : (r.price||'');
       let dateStr = '';
       if (r.date) {
         try { dateStr = new Date(r.date + (r.date.includes('T')?'':'T00:00:00')).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); } catch(e){}
@@ -481,7 +560,7 @@ async function loadOpenHouses() {
       const c = document.createElement('div');
       c.className = 'ohcard' + (isCovered ? ' covered' : '');
       c.dataset.status = isCovered ? 'Covered' : 'Needs Agent';
-      c.innerHTML = `<div class="ohhead"><div><div class="ohaddr">${r.address||''}</div><div class="ohprice">${r.price||''}</div></div><span class="badge ${isCovered?'badge-green':'badge-orange'}">${isCovered?'Covered':'Needs Agent'}</span></div>
+      c.innerHTML = `<div class="ohhead"><div><div class="ohaddr">${r.address||''}</div><div class="ohprice">${ohFmtPrice}</div></div><span class="badge ${isCovered?'badge-green':'badge-orange'}">${isCovered?'Covered':'Needs Agent'}</span></div>
         <div class="ohdets">${dateStr?`<span class="ohdet">📅 ${dateStr}</span><span class="ohdet">&nbsp;·&nbsp;</span>`:''}<span class="ohdet">${fmt12(r.startTime)}${r.endTime?' – '+fmt12(r.endTime):''}</span>${(r.beds||r.baths)?`<span class="ohdet">&nbsp;·&nbsp;</span><span class="ohdet">${r.beds?r.beds+' bd':''}${r.beds&&r.baths?' / ':''}${r.baths?r.baths+' ba':''}</span>`:''}</div>
         ${r.notes||r.claimedBy?`<div class="ohnotes">${isCovered&&r.claimedBy?'Hosted by: '+r.claimedBy:(r.notes||'')}</div>`:''}
         <div class="ohfoot"><div class="oh-by">Listed by ${r.agentName||''}</div>${isCovered?`<span style="font-size:12px;color:#1a6e3a;font-weight:700;">✓ ${r.claimedBy?'Claimed by '+r.claimedBy:'Agent Confirmed'}</span>`:`<button class="btn btn-p btn-sm" onclick="claimOH(this,'${addrSafe}')">Claim This Open House</button>`}</div>`;
